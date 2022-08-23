@@ -1,0 +1,337 @@
+Implemented changes and comments
+
+
+A91-01 | Divide Before Multiply
+ETHUSDTSwap.sol#L207-207: 207                   solved  "swap.targetSize / PRICE_DECIMALS" moved to common denominator, "targetSizeReduced" removed
+ETHUSDTSwap.sol#L226-226: 226                   solved  "swap.targetSize / PRICE_DECIMALS" moved here to common denominator
+ETHUSDTSwap.sol#L250-250: 250                   solved  "swap.targetSize / swap.initPrice" moved to common denominator, "targetETH" removed
+ETHUSDTSwap.sol#L251-251: 251                   solved  "swap.targetSize / swap.initPrice" moved here to common denominator
+WBTCUSDTSwap.sol#L203-203: 203                  solved  "swap.targetSize / PRICE_DECIMALS" moved to common denominator, "targetSizeReduced" removed
+WBTCUSDTSwap.sol#L222-222: 222                  solved  "swap.targetSize / PRICE_DECIMALS" moved here to common denominator
+WBTCUSDTSwap.sol#L246-246: 246                  solved  "swap.targetSize / swap.initPrice" moved to common denominator, "targetETH" removed
+WBTCUSDTSwap.sol#L247-247: 247                  solved  "swap.targetSize / swap.initPrice" moved here to common denominator
+MetalSwapAbstract.sol#L161-161: 161             solved  "targetSize / PRICE_DECIMALS" moved down to common denominator, "targetSizeReduced" removed
+MetalSwapAbstract.sol#L169-169: 169             solved  "targetSize / PRICE_DECIMALS" moved here to common denominator
+MetalSwapAbstract.sol#L178-178: 178             solved  "targetSize / initPrice" moved down to common denominator, "targetASSET" removed
+MetalSwapAbstract.sol#L179-179: 179             solved  "targetSize / initPrice" moved here to common denominator
+MetalSwapAbstract.sol#L201-201: 201             solved  "(swapAvgAsset * 100 * mult6) / (swapAvgAsset + swapAvgCurrency)" moved down to common denominator, "assetPerc" removed
+MetalSwapAbstract.sol#L202-202: 202             solved  "(swapAvgCurrency * 100 * mult6) / (swapAvgAsset + swapAvgCurrency)" moved down here common denominator, "currencyPerc" removed
+MetalSwapAbstract.sol#L205-205: 205             solved  "(swapAvgAsset * 100 * mult6) / (swapAvgAsset + swapAvgCurrency)" moved down to common denominator
+MetalSwapAbstract.sol#L212-212: 212             solved  "(swapAvgCurrency * 100 * mult6) / (swapAvgAsset + swapAvgCurrency)" moved down here common denominator
+FeeManager.sol#L65-65: 65                       solved  "(profitConvert + cover) * 1e6 / cover" moved down to common denominator, "profitPercent" removed
+FeeManager.sol#L66-66: 66                       solved  "(profitConvert + cover) * 1e6 / cover" moved down to common denominator
+StakingPoolSlowRelease.sol#L81-81: 81           solved  "lockupPeriod" moved to common denominator
+StakingPoolSlowRelease.sol#L125-125: 125        solved  "lockupPeriod" moved to common denominator
+StakingPoolSlowRelease.sol#L130-130: 130        solved  "lockupPeriod" moved to common denominator
+
+
+A91-02 | Variables That Could Be Declared as `constant`
+MetalSwapAbstract.sol#L44-44: 44                solved  "mult6" declared constant
+MetalSwapPoolAbstract.sol#L22-22: 22            solved  "secondsInADay" declared constant
+FeeManager.sol#L15-15: 15                       solved but not as suggested  "PRICE_DECIMALS" added to constructor & new general setter implemented ("setMainParameters")
+NFTDescriptor.sol#L27-27: 27                    solved  "borderDiamond" declared constant
+NFTDescriptor.sol#L28-28: 28                    solved  "borderGold" declared constant
+NFTDescriptor.sol#L29-29: 29                    solved  "borderSilver" declared constant
+NFTDescriptor.sol#L30-30: 30                    solved  "borderBronze" declared constant
+NFTDescriptor.sol#L37-37: 37                    solved  "addressETH" declared constant
+StakingPoolSlowRelease.sol#L14-14: 14           solved  "mult" declared constant
+
+
+A91-03 | User-Defined Getters
+MetalSwapAbstract.sol#L226-228: 226             solved  "getSafetyMarginX100" removed
+MetalSwapAbstract.sol#L344-346: 344             solved  "getMarginFactorAsset" removed
+MetalSwapAbstract.sol#L348-350: 348             solved  "getMarginFactorCurrency" removed
+StakingPoolV2Base.sol#L166-168: 166             solved  "getPoolWeightedAverage" removed
+StakingPoolV2Base.sol#L170-172: 170             solved  "getRewardTokensAmount" removed
+StakingPoolV2Base.sol#L174-176: 174             solved  "getStakedTokensTotal" removed
+StakingPoolV2Base.sol#L178-180: 178             solved  "getTokensStakedPerUser" removed
+StakingPoolV2Base.sol#L182-184: 182             solved  "getUserWeightedAverage" removed
+StakingPoolV2Base.sol#L195-197: 195             solved  "_transferGovernance" removed
+
+
+A91-04 | Improper Usage of `public` and `external` Type
+ETHPool.sol#L15-15: 15                          solved "createNewPosition" visibility changed to external
+ETHPool.sol#L34-34: 34                          solved "addLiquidity" visibility changed to external
+ETHPool.sol#L51-51: 51                          solved "removeLiquidity" visibility changed to external
+ETHUSDTSwap.sol#L16-16: 16                      solved "createSwap" visibility changed to external
+ETHUSDTSwap.sol#L75-75: 75                      solved "closeSwap" visibility changed to external
+ETHUSDTSwap.sol#L111-111: 111                   solved "executeSwap" visibility changed to external
+ETHUSDTSwap.sol#L132-132: 132                   solved "marginCall" visibility changed to external
+ETHUSDTSwap.sol#L167-167: 167                   solved "addCover" visibility changed to external
+ETHUSDTSwap.sol#L286-286: 286                   solved "transferGovernance" visibility changed to external
+SettlementFeeContainer.sol#L35-35: 35           solved "addSwapPairsManagement" visibility changed to external
+SettlementFeeContainer.sol#L40-40: 40           solved "removeSwapPairsManagement" visibility changed to external
+SettlementFeeContainer.sol#L71-71: 71           solved "pauseSC" visibility changed to external
+SettlementFeeContainer.sol#L75-75: 75           solved "unpauseSC" visibility changed to external
+SettlementFeeContainer.sol#L79-79: 79           solved "decommissionSC" visibility changed to external
+USDTPool.sol#L17-17: 17                         solved "createNewPosition" visibility changed to external
+USDTPool.sol#L38-38: 38                         solved "addLiquidity" visibility changed to external
+USDTPool.sol#L56-56: 56                         solved "removeLiquidity" visibility changed to external
+WBTCPool.sol#L17-17: 17                         solved "createNewPosition" visibility changed to external
+WBTCPool.sol#L38-38: 38                         solved "addLiquidity" visibility changed to external
+WBTCPool.sol#L56-56: 56                         solved "removeLiquidity" visibility changed to external
+WBTCUSDTSwap.sol#L16-16: 16                     solved "createSwap" visibility changed to external
+WBTCUSDTSwap.sol#L71-71: 71                     solved "closeSwap" visibility changed to external
+WBTCUSDTSwap.sol#L106-106: 106                  solved "executeSwap" visibility changed to external
+WBTCUSDTSwap.sol#L127-127: 127                  solved "marginCall" visibility changed to external
+WBTCUSDTSwap.sol#L162-162: 162                  solved "addCover" visibility changed to external
+WBTCUSDTSwap.sol#L285-285: 285                  solved "transferGovernance" visibility changed to external
+MetalSwapAbstract.sol#L93-93: 93                solved "finalizeContract" visibility changed to external
+MetalSwapAbstract.sol#L122-122: 122             solved "createSwap" visibility changed to external
+MetalSwapAbstract.sol#L126-126: 126             solved "closeSwap" visibility changed to external
+MetalSwapAbstract.sol#L130-130: 130             solved "executeSwap" visibility changed to external
+MetalSwapAbstract.sol#L135-135: 135             solved "marginCall" visibility changed to external
+MetalSwapAbstract.sol#L139-139: 139             solved "addCover" visibility changed to external
+MetalSwapAbstract.sol#L154-154: 154             solved "setTokenRewardTreasury" visibility changed to external
+MetalSwapAbstract.sol#L236-236: 236             solved "setSafetyMarginX100" visibility changed to external
+MetalSwapAbstract.sol#L247-247: 247             solved "setRewardRate" visibility changed to external
+MetalSwapAbstract.sol#L262-262: 262             solved "transferGovernance" visibility changed to external
+MetalSwapAbstract.sol#L304-304: 304             solved "setMinTimeSwap" visibility changed to external
+MetalSwapAbstract.sol#L308-308: 308             solved "setMarginFactorAsset" visibility changed to external
+MetalSwapAbstract.sol#L312-312: 312             solved "setMarginFactorCurrency" visibility changed to external
+MetalSwapAbstract.sol#L316-316: 316             solved "setMainSwapParameters" visibility changed to external
+MetalSwapAbstract.sol#L330-330: 330             solved "setSecondarySwapParameters" visibility changed to external
+MetalSwapAbstract.sol#L364-364: 364             solved "changeDescriptionAndTOU" visibility changed to external
+MetalSwapAbstract.sol#L369-369: 369             solved "pauseSC" visibility changed to external
+MetalSwapAbstract.sol#L373-373: 373             solved "unpauseSC" visibility changed to external
+MetalSwapAbstract.sol#L377-377: 377             solved "decommissionSC" visibility changed to external
+MetalSwapPoolAbstract.sol#L86-86: 86            solved "changeNFTDescriptor" visibility changed to external
+MetalSwapPoolAbstract.sol#L90-90: 90            solved "finalizePool" visibility changed to external
+MetalSwapPoolAbstract.sol#L101-101: 101         solved "createNewPosition" visibility changed to external
+MetalSwapPoolAbstract.sol#L104-104: 104         solved "addLiquidity" visibility changed to external
+MetalSwapPoolAbstract.sol#L107-107: 107         solved "removeLiquidity" visibility changed to external
+MetalSwapPoolAbstract.sol#L110-110: 110         solved "redeemReward" visibility changed to external
+MetalSwapPoolAbstract.sol#L185-185: 185         solved "addSwapPairsManagement" visibility changed to external
+MetalSwapPoolAbstract.sol#L190-190: 190         solved "removeSwapPairsManagement" visibility changed to external
+MetalSwapPoolAbstract.sol#L211-211: 211         solved "changeDescriptionAndTOU" visibility changed to external
+MetalSwapPoolAbstract.sol#L216-216: 216         solved "setMinLiquidity" visibility changed to external
+MetalSwapPoolAbstract.sol#L226-230: 226         solved "pauseSC" visibility changed to external
+MetalSwapPoolAbstract.sol#L230-230: 230         solved "unpauseSC" visibility changed to external
+MetalSwapPoolAbstract.sol#L234-234: 234         solved "decommissionSC" visibility changed to external
+MetalSwapPoolAbstract.sol#L247-247: 247         solved "setRewardTokensPerDay" visibility changed to external
+FeeManager.sol#L71-71: 71                       not applicable "setiV " deleted, applied to "setMainParameters" instead
+FeeManager.sol#L75-75: 75                       not applicable "setSettlementFeePerc" deleted 
+FeeManager.sol#L80-80: 80                       solved "decommissionSC" visibility changed to external
+NFTDescriptor.sol#L107-107: 107                 solved "setCurrencyChip" visibility changed to external
+NFTDescriptor.sol#L111-111: 111                 solved "setCurrencyAdvantageFactor" visibility changed to external
+StakingPoolSlowRelease.sol#L29-29: 29           solved "finalizePoolCreation" visibility changed to external
+StakingPoolSlowRelease.sol#L43-43: 43           solved "finalizeRedeemParameters" visibility changed to external
+StakingPoolSlowRelease.sol#L50-50: 50           solved "stake" visibility changed to external
+StakingPoolSlowRelease.sol#L70-70: 70           - ADDED -   "exit" visibility could be changed to external, no apparent internal use of function in StakingPool smart contracts, why was it not present in the Certik audit "locations"?
+StakingPoolSlowRelease.sol#L105-105: 105        solved "getRedeemUserData" visibility changed to external
+StakingPoolSlowRelease.sol#L120-120: 120        solved "calcCurrentlyMaturedReward" visibility changed to external
+StakingPoolV2Base.sol#L53-53: 53                solved "finalizePoolCreation" visibility changed to external
+StakingPoolV2Base.sol#L70-70: 70                solved "stake" visibility changed to external
+StakingPoolV2Base.sol#L88-88: 88                - ADDED -   "exit" visibility could be changed to external, no apparent internal use of function in StakingPool smart contracts, why was it not present in the Certik audit "locations"?
+StakingPoolV2Base.sol#L106-106: 106             solved "setTime" visibility changed to external
+StakingPoolV2Base.sol#L186-186: 186             solved "transferGovernance" visibility changed to external
+
+
+A91-06 | Redundant Code Components
+SettlementFeeContainer.sol#L51-51: 51           solved  "onlySwapPairsManagement" modifier deleted
+MetalSwapPoolAbstract.sol#L261-261: 261         solved  "onlySwapPairsManagement" modifier deleted
+URIInfo.sol#L67-67: 67                          solved  "generateURIDescriptionTEST" function deleted
+StakingPoolV2Base.sol#L48-48: 48                solved  "finalized = false" statement removed from constructor
+
+
+A91-07 | Comparison to Boolean Constant
+SettlementFeeContainer.sol#L93-93: 93           solved  comparison removed
+MetalSwapAbstract.sol#L391-391: 391             solved  comparison removed
+MetalSwapPoolAbstract.sol#L272-272: 272         solved  comparison removed
+StakingPoolSlowRelease.sol#L30-30: 30           solved  comparison removed, modified misleading error message
+StakingPoolV2Base.sol#L54-54: 54                solved  comparison removed, modified misleading error message
+StakingPoolV2Base.sol#L144-144: 144             solved  comparison removed
+StakingPoolV2Base.sol#L213-213: 213             solved  comparison removed, modified misleading error message
+
+
+CON-03 | Missing Modifier `checkSCUnpaused()`
+ETHPool.sol#L34-34: 34                          solved  checkSCUnpaused() added
+ETHPool.sol#L51-51: 51                          solved  checkSCUnpaused() added
+USDTPool.sol#L56-56: 56                         solved  checkSCUnpaused() added
+
+
+CON-04 | Missing Zero Address Validation
+MetalSwapAbstract.sol#L79-79: 79                solved  zero address check added
+MetalSwapAbstract.sol#L80-80: 80                solved  zero address check added
+MetalSwapAbstract.sol#L82-82: 82                solved  zero address check added
+MetalSwapAbstract.sol#L83-83: 83                solved  zero address check added
+MetalSwapAbstract.sol#L86-86: 86                solved  zero address check added
+MetalSwapAbstract.sol#L87-87: 87                solved  zero address check added
+MetalSwapAbstract.sol#L89-89: 89                solved  zero address check added
+MetalSwapAbstract.sol#L100-100: 100             solved  zero address check added
+MetalSwapAbstract.sol#L101-101: 101             solved  zero address check added
+MetalSwapAbstract.sol#L102-102: 102             solved  zero address check added
+MetalSwapAbstract.sol#L114-114: 114             not applicable  zero address check already present
+MetalSwapAbstract.sol#L155-155: 155             solved  zero address check added
+MetalSwapAbstract.sol#L267-267: 267             solved  zero address check added
+MetalSwapAbstract.sol#L318-318: 318             solved  zero address check added
+MetalSwapAbstract.sol#L319-319: 319             solved  zero address check added
+MetalSwapAbstract.sol#L326-326: 326             solved  zero address check added
+MetalSwapAbstract.sol#L327-327: 327             solved  zero address check added
+MetalSwapAbstract.sol#L333-333: 333             solved  zero address check added
+MetalSwapAbstract.sol#L335-335: 335             solved  zero address check added
+MetalSwapAbstract.sol#L336-336: 336             solved  zero address check added
+MetalSwapAbstract.sol#L338-338: 338             solved  zero address check added
+MetalSwapAbstract.sol#L339-339: 339             solved  zero address check added
+MetalSwapAbstract.sol#L340-340: 340             solved  zero address check added
+MetalSwapPoolAbstract.sol#L55-55: 55            solved  zero address check added
+MetalSwapPoolAbstract.sol#L56-56: 56            solved  zero address check added
+MetalSwapPoolAbstract.sol#L57-57: 57            solved  zero address check added
+MetalSwapPoolAbstract.sol#L87-87: 87            solved  zero address check added
+FeeManager.sol#L20-20: 20                       solved  zero address check added
+NFTDescriptor.sol#L41-41: 41                    solved  zero address check added
+
+
+CON-06 | Variables That Could Be Declared as `immutable`
+MetalSwapAbstract.sol#L21-21: 21                solved  variable made immutable   
+MetalSwapAbstract.sol#L22-22: 22                solved  variable made immutable
+MetalSwapAbstract.sol#L27-27: 27                not applied  variable "feeManager" could need to be updated post - deploy of the smart contract
+FeeManager.sol#L12-12: 12                       not applied  variable "_governance" could need to be updated post - deploy of the smart contract
+NFTDescriptor.sol#L38-38: 38                    solved  variable made immutable
+
+
+CON-07 | Missing Error Messages
+ETHPool.sol#L83-83: 83                          solved  added error messages
+ETHPool.sol#L88-88: 88                          solved  added error messages
+ETHPool.sol#L94-94: 94                          solved  added error messages
+USDTPool.sol#L92-92: 92                         solved  added error messages
+USDTPool.sol#L98-98: 98                         solved  added error messages
+WBTCPool.sol#L92-92: 92                         solved  added error messages
+WBTCPool.sol#L98-98: 98                         solved  added error messages
+
+
+CON-08 | Too Many Digits
+MetalSwapAbstract.sol#L42-42: 42                solved  number updated to scientific notation
+FeeManager.sol#L76-76: 76                       solved  number updated to scientific notation
+
+
+CON-09 | Typo in Variable Name
+ETHPool.sol#L58-58: 58                          solved variable name typo fixed
+ETHPool.sol#L67-67: 67                          solved variable name typo fixed
+ETHPool.sol#L74-74: 74                          solved variable name typo fixed
+USDTPool.sol#L63-63: 63                         solved variable name typo fixed
+USDTPool.sol#L72-72: 72                         solved variable name typo fixed
+USDTPool.sol#L79-79: 79                         solved variable name typo fixed
+WBTCPool.sol#L63-63: 63                         solved variable name typo fixed
+WBTCPool.sol#L72-72: 72                         solved variable name typo fixed    
+WBTCPool.sol#L79-79: 79                         solved variable name typo fixed
+
+
+CON-10 | Unlocked Compiler Version
+ETHPool.sol#L3-3: 3                             solved  compiler version locked to 0.8.7
+ETHUSDTSwap.sol#L3-3: 3                         solved  compiler version locked to 0.8.7
+SettlementFeeContainer.sol#L3-3: 3              solved  compiler version locked to 0.8.7
+USDTPool.sol#L3-3: 3                            solved  compiler version locked to 0.8.7
+WBTCPool.sol#L3-3: 3                            solved  compiler version locked to 0.8.7
+WBTCUSDTSwap.sol#L3-3: 3                        solved  compiler version locked to 0.8.7
+MetalSwapAbstract.sol#L3-3: 3                   solved  compiler version locked to 0.8.7
+MetalSwapPoolAbstract.sol#L3-3: 3               solved  compiler version locked to 0.8.7
+FeeManager.sol#L3-3: 3                          solved  compiler version locked to 0.8.7
+HexStrings.sol#L2-2: 2                          solved  compiler version locked to 0.8.7
+NFTBaseChips.sol#L3-3: 3                        solved  compiler version locked to 0.8.7
+NFTDescriptor.sol#L3-3: 3                       solved  compiler version locked to 0.8.7
+NFTGenerator.sol#L2-2: 2                        solved  compiler version locked to 0.8.7
+NFTGeneratorSupport.sol#L3-3: 3                 solved  compiler version locked to 0.8.7
+URIInfo.sol#L3-3: 3                             solved  compiler version locked to 0.8.7
+
+
+CON-13 | Unclear Purpose of `sendPremium()`
+ETHPool.sol#L82-82: 82                          solved sendPremium function removed
+USDTPool.sol#L86-86: 86                         solved sendPremium function removed
+WBTCPool.sol#L86-86: 86                         solved sendPremium function removed
+MetalSwapPoolAbstract.sol#L159-159: 159                sendPremium virtual function removed 
+
+
+FMM-02 | Tautology
+FeeManager.sol#L76-76: 76                       solved  unnecessary require check removed
+
+
+MCS-02 | Typo In Error Message
+StakingPoolSlowRelease.sol#L32-32: 32           solved  typo in error message corrected
+StakingPoolV2Base.sol#L56-56: 56                solved  typo in error message corrected
+
+
+MCS-03 | Misleading Error Message
+StakingPoolSlowRelease.sol#L30-30: 30           solved  error message changed
+StakingPoolV2Base.sol#L54-54: 54                solved  error message changed
+
+
+WBC-01 | Incorrect Compare Operator
+WBTCPool.sol#L72-72: 72                         solved  require condition changed to liquidityToWithdraw > penalties
+
+
+CON-05 | Usage of `transfer()`/`send` for sending Ether
+ETHPool.sol#L74-74: 74                          solved  transfer changed to Address.sendValue(), function removeLiquidity protected by opezeppelin's nonReentrant
+ETHPool.sol#L90-90: 90                          solved  transfer changed to Address.sendValue(), function send has onlyHighLevelAccess access modifier
+ETHPool.sol#L96-96: 96                          solved  transfer changed to Address.sendValue(), function sendProfit has onlyHighLevelAccess access modifier
+ETHUSDTSwap.sol#L39-39: 39                      solved  transfer changed to Address.sendValue(), function createSwap protected by opezeppelin's nonReentrant
+ETHUSDTSwap.sol#L40-40: 40                      solved  transfer changed to Address.sendValue(), function createSwap protected by opezeppelin's nonReentrant
+ETHUSDTSwap.sol#L179-179: 179                   solved  transfer changed to Address.sendValue(), function addCover protected by opezeppelin's nonReentrant
+ETHUSDTSwap.sol#L263-263: 263                   solved  transfer changed to Address.sendValue(), function lockFunds is internal
+SettlementFeeContainer.sol#L27-27: 27           solved  transfer changed to Address.sendValue(), function payLiquidationFee has onlyHighLevelAccess access modifier
+SettlementFeeContainer.sol#L82-82: 82           solved  transfer changed to Address.sendValue(), function decommissionSC has onlyOwner access modifier
+MetalSwapAbstract.sol#L380-380: 380             solved  transfer changed to Address.sendValue(), function decommissionSC has onlyOwner access modifier
+MetalSwapPoolAbstract.sol#L237-237: 237         solved  transfer changed to Address.sendValue(), function decommissionSC has onlyOwner access modifier
+FeeManager.sol#L82-82: 82                       solved  transfer changed to Address.sendValue(), function decommissionSC has onlyOwner access modifier
+
+
+A91-05 | Missing Emit Events
+ETHPool.sol#L82-82: 82                          aborted     sendPremium function removed
+ETHPool.sol#L87-87: 87                          solved  event added  
+ETHPool.sol#L93-93: 93                          solved  event added
+ETHUSDTSwap.sol#L280-280: 280                   solved  event added
+SettlementFeeContainer.sol#L23-23: 23           solved  event added
+SettlementFeeContainer.sol#L35-35: 35           solved  event added
+SettlementFeeContainer.sol#L40-40: 40           solved  event added
+SettlementFeeContainer.sol#L71-71: 71           solved  event added
+SettlementFeeContainer.sol#L75-75: 75           solved  event added
+SettlementFeeContainer.sol#L79-79: 79           solved  event added
+USDTPool.sol#L86-86: 86                         aborted     sendPremium function removed
+USDTPool.sol#L91-91: 91                         solved  event added
+USDTPool.sol#L97-97: 97                         solved  event added
+WBTCPool.sol#L86-86: 86                         aborted     sendPremium function removed
+WBTCPool.sol#L91-91: 91                         solved  event added
+WBTCPool.sol#L97-97: 97                         solved  event added
+WBTCUSDTSwap.sol#L276-276: 276                  solved  event added
+MetalSwapAbstract.sol#L93-93: 93                solved  event added
+MetalSwapAbstract.sol#L112-112: 112             aborted     setSettlementFeeContainer function removed
+MetalSwapAbstract.sol#L154-154: 154             aborted     setTokenRewardTreasury function removed
+MetalSwapAbstract.sol#L236-236: 236             solved  event added
+MetalSwapAbstract.sol#L247-247: 247             solved  event added
+MetalSwapAbstract.sol#L262-262: 262             solved  event added
+MetalSwapAbstract.sol#L304-304: 304             aborted     setMinTimeSwap function removed
+MetalSwapAbstract.sol#L308-308: 308             solved  event added to setMarginFactors instead of setMarginFactorAsset 
+MetalSwapAbstract.sol#L312-312: 312             aborted     setMarginFactorCurrency function removed
+MetalSwapAbstract.sol#L316-316: 316             solved  event added
+MetalSwapAbstract.sol#L330-330: 330             aborted     setSecondarySwapParameters function removed
+MetalSwapAbstract.sol#L364-364: 364             solved  event added
+MetalSwapAbstract.sol#L369-369: 369             solved  event added
+MetalSwapAbstract.sol#L373-373: 373             solved  event added
+MetalSwapAbstract.sol#L377-377: 377             solved  event added
+MetalSwapPoolAbstract.sol#L86-86: 86            solved  event added
+MetalSwapPoolAbstract.sol#L90-90: 90            solved  event added
+MetalSwapPoolAbstract.sol#L146-146: 146         solved  event added
+MetalSwapPoolAbstract.sol#L154-154: 154         solved  event added
+MetalSwapPoolAbstract.sol#L162-162: 162         solved  event added
+MetalSwapPoolAbstract.sol#L185-185: 185         solved  event added
+MetalSwapPoolAbstract.sol#L190-190: 190         solved  event added
+MetalSwapPoolAbstract.sol#L211-211: 211         solved  event added
+MetalSwapPoolAbstract.sol#L216-216: 216         solved  event added
+MetalSwapPoolAbstract.sol#L220-220: 220         solved  event added
+MetalSwapPoolAbstract.sol#L226-226: 226         solved  event added
+MetalSwapPoolAbstract.sol#L230-230: 230         solved  event added
+MetalSwapPoolAbstract.sol#L234-234: 234         solved  event added
+MetalSwapPoolAbstract.sol#L247-247: 247         solved  event added
+FeeManager.sol#L71-71: 71                       aborted     setiV function removed
+FeeManager.sol#L75-75: 75                       aborted     setSettlementFeePerc function removed
+FeeManager.sol#L80-80: 80                       aborted     decommissionSC function removed
+NFTDescriptor.sol#L107-107: 107                 solved  event added
+NFTDescriptor.sol#L111-111: 111                 solved  event added
+StakingPoolSlowRelease.sol#L43-43: 43           solved  event added
+StakingPoolV2Base.sol#L106-106: 106             solved  event added
+StakingPoolV2Base.sol#L113-113: 113             solved  event added
+StakingPoolV2Base.sol#L118-118: 118             solved  event added
+StakingPoolV2Base.sol#L122-122: 122             solved  event added
+
+FeeManager.sol chaged name to FinancialSwapManager.sol
+

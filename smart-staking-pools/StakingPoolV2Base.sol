@@ -1,4 +1,4 @@
-// "SPDX-License-Identifier: UNLICENSED"
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.7;
 
@@ -32,9 +32,13 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
     mapping(address => uint256) public userWeightedAverage;
     
     /* ========== EVENTS ========== */
-
+    event PauseStaking();
+    event UnpauseStaking();
+    event SetTime(uint256 initTimestamp, uint256 endTimestamp);
+    event ClosePool( bool paused );
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
+    event TransferGovernance(address newGovernace);
     event Exit(address indexed user, uint256 stakedTokens, uint256 reward);
 
     /* ========== CONSTRUCTOR ========== */
@@ -45,15 +49,14 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
         stakingToken = _stakingToken;
         _transferGovernance(_msgSender());
         paused = true;
-        finalized = false;
     }
 
     /* ========== FUNCTIONS ========== */
        
-    function finalizePoolCreation (uint256 _startStaking, uint256 periodInSec, uint256 amountOfRewardsTokensToSend,uint16 _slotNumber, uint256 _forSlotAmount) public virtual onlyGovernance nonReentrant {
-        require(finalized == false, "Error: Staking Pool must be paused in order to finalize!");
+    function finalizePoolCreation (uint256 _startStaking, uint256 periodInSec, uint256 amountOfRewardsTokensToSend,uint16 _slotNumber, uint256 _forSlotAmount) external virtual onlyGovernance nonReentrant {
+        require (!finalized, "Error: Staking Pool cannot already be finalized in order to finalize!");
         require (amountOfRewardsTokensToSend > 0, "Error: The creator must send some reward tokens to the pool in order to create it");
-        require (stakingToken.transferFrom(msg.sender, address(this), amountOfRewardsTokensToSend), "Error: Reward tokens trasnfer error, cannot create pool");
+        require (stakingToken.transferFrom(msg.sender, address(this), amountOfRewardsTokensToSend), "Error: Reward tokens transfer error, cannot create pool");
         
         startStaking = _startStaking;
         
@@ -67,7 +70,7 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
         emit RewardAdded(amountOfRewardsTokensToSend);
     }
 
-    function stake(uint256 amount, uint16 slotNumberForUser) public virtual nonReentrant checkPoolOpen checkStakingUnpaused{
+    function stake(uint256 amount, uint16 slotNumberForUser) external virtual nonReentrant checkPoolOpen checkStakingUnpaused{
         require(amount > 0, "Error: Cannot stake 0");
         
         require(stakingToken.transferFrom(msg.sender, address(this), amount), "Error during token transfer");
@@ -103,24 +106,28 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
         emit RewardAdded(amountToAdd);
     }
     
-    function setTime(uint256 initTimestamp, uint256 endTimestamp) public onlyGovernance {
+    function setTime(uint256 initTimestamp, uint256 endTimestamp) external onlyGovernance {
         if(endTimestamp > initTimestamp){
             startStaking = initTimestamp;
             endStaking = endTimestamp;
         }
+        emit SetTime( initTimestamp,  endTimestamp);
     }
     
     function closePool() public onlyGovernance nonReentrant{     
         paused = true;                   
         require (stakingToken.transfer(msg.sender, stakingToken.balanceOf(address(this))), "Error during token transfer");
+        emit ClosePool(  paused );
     }
     
     function pauseStaking () public onlyGovernance {
         paused = true;
+        emit PauseStaking ();
     }
     
     function unpauseStaking () public onlyGovernance {
         paused = false;
+        emit UnpauseStaking ();
     }
     
     
@@ -141,7 +148,7 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
     }
     
     function canIStakeNow() public view returns (bool poolReady) {                  
-        if((paused == false) && (block.timestamp >= startStaking) && (block.timestamp <= endStaking)){
+        if((!paused) && (block.timestamp >= startStaking) && (block.timestamp <= endStaking)){
             return true;
         }
         return false;
@@ -162,40 +169,22 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
     function getStakingPeriod() public view returns (uint256 , uint256){
         return (startStaking, endStaking);
     }
-
-    function getPoolWeightedAverage() public view returns (uint256){
-        return poolWeightedAverage;
-    }
     
-    function getRewardTokensAmount() public view returns (uint256){
-        return rewardTokensAmount;
-    }
-    
-    function getStakedTokensTotal() public view returns (uint256){
-        return stakedTokensTotal;
-    }
-    
-    function getTokensStakedPerUser(address user) public view returns (uint256){
-        return tokensStakedPerUser[user];
-    }
-    
-    function getUserWeightedAverage(address user) public view returns (uint256){
-        return userWeightedAverage[user];
-    }
-    
-    function transferGovernance(address newGovernace) public virtual onlyOwner {
-        require(newGovernace != address(0), "Governace: new owner is the zero address");
+    function transferGovernance(address newGovernace) external virtual onlyOwner {
+        require(newGovernace != address(0), "Error on _transferGovernance: new owner cannot be zero address");
         _transferGovernance(newGovernace);
+        emit TransferGovernance(newGovernace);
     }
     
-     function _transferGovernance(address newGovernace) internal virtual {
+    function _transferGovernance(address newGovernace) private {
+        require (newGovernace != address(0), "Error on _transferGovernance: new owner cannot be zero address");
         _governance = newGovernace;
-     }
-     
-     function governance() public view virtual returns (address) {
+    }
+  
+    function governance() public view virtual returns  (address) {
         return _governance;
     }
-    
+
     /* ========== MODIFIERS ========== */
     
     modifier checkPoolOpen() {
@@ -210,7 +199,7 @@ abstract contract StakingPoolV2base is ReentrancyGuard, Ownable {
     }
     
     modifier checkStakingUnpaused() {
-        require(paused == false, "Error: Swap is paused, try again later");
+        require(!paused, "Error: Staking period is paused, try again later");
         _;
     }
     

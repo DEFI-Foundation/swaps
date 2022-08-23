@@ -1,4 +1,4 @@
-// "SPDX-License-Identifier: UNLICENSED"
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.7;
 
@@ -11,7 +11,7 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
     bool private finalized;
     uint256 public periodLockupPercent = 555555;        //range [0-100*1M]=[0-100000000], 0,555555% each day lasts for 180 days until complete unlock
     uint256 public lockupPeriod = 1 days;
-    uint256 public mult = 1e6;
+    uint256 public constant mult = 1e6;
     
     struct RedeemData {
         bool hasBegunRedeem;
@@ -21,15 +21,18 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
 
     mapping (address => RedeemData) public userRedeemData;
 
+
+    event FinalizeRedeemParameters(uint256 _periodLockupPercent, uint256 _lockupPeriodInSec,bool finalized, bool paused);
+
     event TokensRedeemed(address user, uint256 redeemedTokens, uint256 timestamp);
 
     constructor(IERC20 _stakingToken) StakingPoolV2base(_stakingToken) {
     }
 
-    function finalizePoolCreation ( uint256 _startStaking, uint256 periodInSec, uint256 amountOfRewardsTokensToSend, uint16 _slotNumber, uint256 _forSlotAmount) public override onlyGovernance nonReentrant {
-        require (finalized == false, "Error: Staking Pool must be paused in order to finalize!");
+    function finalizePoolCreation ( uint256 _startStaking, uint256 periodInSec, uint256 amountOfRewardsTokensToSend, uint16 _slotNumber, uint256 _forSlotAmount) external override onlyGovernance nonReentrant {
+        require (!finalized, "Error: Staking Pool cannot already be finalized in order to finalize!");
         require (amountOfRewardsTokensToSend > 0, "Error: The creator must send some reward tokens to the pool in order to create it");
-        require (stakingToken.transferFrom(msg.sender, address(this), amountOfRewardsTokensToSend), "Error: Reward tokens trasnfer error, cannot create pool");
+        require (stakingToken.transferFrom(msg.sender, address(this), amountOfRewardsTokensToSend), "Error: Reward tokens transfer error, cannot create pool");
         
         startStaking = _startStaking;
         
@@ -40,14 +43,15 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
         emit RewardAdded(amountOfRewardsTokensToSend);
     }
 
-    function finalizeRedeemParameters (uint256 _periodLockupPercent, uint256 _lockupPeriodInSec) public onlyGovernance nonReentrant {
+    function finalizeRedeemParameters (uint256 _periodLockupPercent, uint256 _lockupPeriodInSec) external onlyGovernance nonReentrant {
         periodLockupPercent = _periodLockupPercent;
         lockupPeriod = _lockupPeriodInSec;
         finalized = true;
         paused = false;
+        emit FinalizeRedeemParameters( _periodLockupPercent,  _lockupPeriodInSec, finalized,  paused);
     }
 
-    function stake(uint256 amount, uint16 slotNumberForUser) public override nonReentrant checkPoolOpen checkStakingUnpaused{
+    function stake(uint256 amount, uint16 slotNumberForUser) external override nonReentrant checkPoolOpen checkStakingUnpaused{
         require(amount > 0, "Error: Cannot stake 0");
         
         require(stakingToken.transferFrom(msg.sender, address(this), amount), "Error during token transfer");
@@ -78,7 +82,7 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
             userRedeemData[msg.sender].leftOverToRedeem = tokensStakedPerUser[msg.sender] + calcReward(msg.sender);
         }
 
-        uint256 tokensToRedeem =  (tokensStakedPerUser[msg.sender] + calcReward(msg.sender)) * periodLockupPercent * ((block.timestamp - userRedeemData[msg.sender].lastRedeemTimestamp) / lockupPeriod) / (mult * 100);
+        uint256 tokensToRedeem =  (tokensStakedPerUser[msg.sender] + calcReward(msg.sender)) * periodLockupPercent * (block.timestamp - userRedeemData[msg.sender].lastRedeemTimestamp) / (mult * 100 * lockupPeriod);
 
         if (tokensToRedeem >= userRedeemData[msg.sender].leftOverToRedeem){
             tokensToRedeem = userRedeemData[msg.sender].leftOverToRedeem;
@@ -102,7 +106,7 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
 
     /* ========== VIEWS ========== */
 
-    function getRedeemUserData (address user) public view returns (bool hasBegunRedeem, uint256 leftOverToRedeem, uint256 lastRedeemTimestamp){
+    function getRedeemUserData (address user) external view returns (bool hasBegunRedeem, uint256 leftOverToRedeem, uint256 lastRedeemTimestamp){
         return (
             userRedeemData[user].hasBegunRedeem,
             userRedeemData[user].leftOverToRedeem,
@@ -117,17 +121,17 @@ contract StakingPoolSlowRelease is StakingPoolV2base {
         return 0;
     }
 
-    function calcCurrentlyMaturedReward (address user) public view returns (uint256 tokensToRedeem) {
+    function calcCurrentlyMaturedReward (address user) external view returns (uint256 tokensToRedeem) {
         
         if (block.timestamp >= endStaking) {
             
             if (userRedeemData[user].hasBegunRedeem) {
-                tokensToRedeem =  (tokensStakedPerUser[user] + calcReward(user)) * periodLockupPercent * ((block.timestamp - userRedeemData[user].lastRedeemTimestamp) / lockupPeriod) / (mult * 100);
+                tokensToRedeem = (tokensStakedPerUser[user] + calcReward(user)) * periodLockupPercent * (block.timestamp - userRedeemData[user].lastRedeemTimestamp) / (mult * 100 * lockupPeriod);
                 if (tokensToRedeem >= userRedeemData[user].leftOverToRedeem){
                     tokensToRedeem = userRedeemData[user].leftOverToRedeem;
                 }
             } else {
-                tokensToRedeem =  (tokensStakedPerUser[user] + calcReward(user)) * periodLockupPercent * ((block.timestamp - endStaking) / lockupPeriod) / (mult * 100);
+                tokensToRedeem =  (tokensStakedPerUser[user] + calcReward(user)) * periodLockupPercent * (block.timestamp - endStaking) / (mult * 100 * lockupPeriod);
                 if (tokensToRedeem >= (tokensStakedPerUser[user] + calcReward(user))){
                     tokensToRedeem = (tokensStakedPerUser[user] + calcReward(user));
                 }
