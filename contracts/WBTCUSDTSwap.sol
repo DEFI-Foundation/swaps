@@ -14,7 +14,7 @@ contract WBTCUSDTSwap is MetalSwapAbstract {
         ERC20 _erc20Currency,
         MetalSwapPoolAbstract _poolCurrency,
         uint256 _nrOfCurrencyDecimals,
-        AggregatorInterface pp,
+        IPriceProvider pp,
         ERC20 _governanceToken,
         address governanceAddr,
         address _financialSwapManager

@@ -335,3 +335,7 @@ StakingPoolV2Base.sol#L122-122: 122             solved  event added
 
 FeeManager.sol chaged name to FinancialSwapManager.sol
 
+MSA-02 | Third Party Dependency
+MetalSwapAbstract.sol#L5-5: 5			mitigated 	Externalized to PriceProvider.sol the asset price datafeed in order to decrease reliance on chainlink (third party dependency).
+MetalSwapAbstract.sol#L32-32: 32		mitigated 	If needed the Chainlink price datafeed can now be changed without modifying the core swap smart contracts but simply by deploying a new instance of PriceProvider.sol.
+

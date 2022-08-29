@@ -3,13 +3,14 @@
 pragma solidity 0.8.7;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
-import '@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './MetalSwapPoolAbstract.sol';
 import '../SettlementFeeContainer.sol';
 import '../libraries/FinancialSwapManager.sol';
+import '../libraries/IPriceProvider.sol';
+
 
 abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     string public descriptionTOU;
@@ -25,7 +26,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     address public governanceTokenRewardTreasury;
     address public premiumAddress;
     SettlementFeeContainer public settlementFeeContainer;
-    AggregatorInterface public priceProvider;
+    IPriceProvider public priceProvider;
     uint256 public rateReward;
     uint256 public swapAvgAsset;
     uint256 public swapAvgCurrency;
@@ -161,7 +162,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         ERC20 _erc20Currency,
         MetalSwapPoolAbstract _poolCurrency,
         uint256 _nrOfCurrencyDecimals,
-        AggregatorInterface pp,
+        IPriceProvider pp,
         ERC20 _governanceToken,
         address _governanceAddr,
         address _financialSwapManager
@@ -286,7 +287,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     {}
 
     function getPrice() public view returns (uint256) {
-        return uint256(priceProvider.latestAnswer());
+        return priceProvider.getPrice();
     }
 
     function getTotalToSpend(
@@ -551,7 +552,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
             _settlementFeeContainer
         );
         PRICE_DECIMALS = _PRICE_DECIMALS;
-        priceProvider = AggregatorInterface(_priceProvider);
+        priceProvider = IPriceProvider(_priceProvider);
         safetyMarginX100 = _safetyMarginX100;
         emit SetMainSwapParameters(
             _governanceToken,
