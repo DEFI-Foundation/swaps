@@ -333,9 +333,15 @@ StakingPoolV2Base.sol#L113-113: 113             solved  event added
 StakingPoolV2Base.sol#L118-118: 118             solved  event added
 StakingPoolV2Base.sol#L122-122: 122             solved  event added
 
+
 FeeManager.sol chaged name to FinancialSwapManager.sol
+
 
 MSA-02 | Third Party Dependency
 MetalSwapAbstract.sol#L5-5: 5			mitigated 	Externalized to PriceProvider.sol the asset price datafeed in order to decrease reliance on chainlink (third party dependency).
 MetalSwapAbstract.sol#L32-32: 32		mitigated 	If needed the Chainlink price datafeed can now be changed without modifying the core swap smart contracts but simply by deploying a new instance of PriceProvider.sol.
+
+
+SPS-01 | Why is `finalizeRedeemParameters()` separated from `finalizePoolCreation()`?
+StakingPoolSlowRelease.sol#L29-48: 29   solved  added require on finalization condition for the finalizeRedeemParameters method
 
