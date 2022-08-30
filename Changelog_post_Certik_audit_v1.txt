@@ -345,3 +345,8 @@ MetalSwapAbstract.sol#L32-32: 32		mitigated 	If needed the Chainlink price dataf
 SPS-01 | Why is `finalizeRedeemParameters()` separated from `finalizePoolCreation()`?
 StakingPoolSlowRelease.sol#L29-48: 29   solved  added require on finalization condition for the finalizeRedeemParameters method
 
+2022.08.30
+BUG CORRECTION      Corrected bug in targetSize calculation if SwapType(0), in function verifySwapPermission logic (@Certik please check the updated verifySwapPermission logic) (MetalSwapAbstract.sol lines 474 to 525)
+FEATURE MERGE       Merged setSafetyMargin function in setSwapSafetyParameters (@Certik please check the updated limit logic, that allows to limit certain swap parameters if a limit boolean is active) (MetalSwapAbstract.sol lines 449 to 472)
+FEATURE ADDED       Added function setPriceProvider that only changes the priceProvider in order to solve Certik audit issue MSA-02
+

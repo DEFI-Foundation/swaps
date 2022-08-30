@@ -124,7 +124,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         uint256 _minTimeSwap,
         string _descriptionTOU
     );
-    event SetSafetyMarginX100(uint16 newSafetyMarginX100);
     event SetRewardRate(uint256 _rateReward);
     event SetMarginFactors(
         uint256 _newMarginFactorCurrency,
@@ -142,13 +141,16 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     event ChangeDescriptionAndTOU(string _descriptionTOU);
     event SetStateSC(bool state);
     event TransferGovernance(address newGovernace);
-    event SetLimit(
+    event SetSwapSafetyParameters(
         uint256 _minTimeSwap,
         bool _limitActive,
         uint256 _limitSwap,
         uint256 coverX100Min,
-        uint256 targetSizeMin
+        uint256 targetSizeMin,
+        uint16 _safetyMarginX100
     );
+    event SetPriceProvider(address priceProvider);
+
     event DecommissionSC(
         address decommissionAsset,
         uint256 decommissionBalance,
@@ -390,14 +392,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
 
     //******************* support functions *****************************
 
-    function setSafetyMarginX100(uint16 newSafetyMarginX100)
-        external
-        onlyGovernance
-    {
-        safetyMarginX100 = newSafetyMarginX100;
-        emit SetSafetyMarginX100(newSafetyMarginX100);
-    }
-
     function calcRewardPenalties(
         uint256 rewardAmount,
         uint256 initTime,
@@ -444,24 +438,36 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         return _governance;
     }
 
-    function setLimit(
+    function setPriceProvider(address _priceProvider) external  onlyOwner{
+        require( _priceProvider != address(0),
+            'Error on setPriceProvider: input cannot be zero address'
+        );
+        priceProvider = IPriceProvider(_priceProvider);
+        emit SetPriceProvider(_priceProvider);
+    }
+
+    function setSwapSafetyParameters(
         uint256 _minTimeSwap,
         bool _limitActive,
         uint256 _limitSwap,
         uint256 _coverX100Min,
-        uint256 _targetSizeMin
+        uint256 _targetSizeMin,
+        uint16 _safetyMarginX100
     ) external onlyGovernance {
         minTimeSwap = _minTimeSwap;
         limitActive = _limitActive;
         limitSwap = _limitSwap;
         coverX100Min = _coverX100Min;
         targetSizeMin = _targetSizeMin;
-        emit SetLimit(
+        safetyMarginX100 = _safetyMarginX100;
+
+        emit SetSwapSafetyParameters(
             _minTimeSwap,
             _limitActive,
             _limitSwap,
             _coverX100Min,
-            _targetSizeMin
+            _targetSizeMin,
+            _safetyMarginX100
         );
     }
 
@@ -472,8 +478,10 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     {
         //targetSize must NOT be normalized in input
 
+        uint256 currentPrice = getPrice();
+
         if (swapDirection == SwapType(0)) {
-            targetSize = formatAmount(targetSize, assetDecimals, 18);
+            targetSize = formatAmount(targetSize, assetDecimals, 18) * currentPrice / PRICE_DECIMALS;
         } else {
             targetSize = formatAmount(targetSize, currencyDecimals, 18);
         }
@@ -482,8 +490,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
             if (swapAvgCurrency + swapAvgAsset + targetSize > limitSwap)
                 return false;
         }
-
-        uint256 currentPrice = getPrice();
 
         uint256 assetPoolAvailability = (formatAmount(
             poolAsset.availableBalance(),
@@ -500,11 +506,9 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         ) / marginFactorCurrency;
 
         if (swapDirection == SwapType(0)) {
-            uint256 targetSizeAsset2Currency = (targetSize * currentPrice) /
-                PRICE_DECIMALS;
-            if (swapAvgAsset + targetSizeAsset2Currency >= swapAvgCurrency) {
+            if (swapAvgAsset + targetSize >= swapAvgCurrency) {
                 return
-                    swapAvgAsset + targetSizeAsset2Currency - swapAvgCurrency <
+                    swapAvgAsset + targetSize - swapAvgCurrency <
                     currencyPoolAvailability;
             }
             return true;
