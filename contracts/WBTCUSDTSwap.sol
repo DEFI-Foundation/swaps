@@ -48,7 +48,10 @@ contract WBTCUSDTSwap is MetalSwapAbstract {
     {
         require(
             coverX100 >= coverX100Min &&
-                targetSize >= targetSizeMin &&
+                ((swapType == SwapType(0) &&
+                    targetSize >= targetSizeMinAsset) ||
+                    (swapType == SwapType(1) &&
+                        targetSize >= targetSizeMinCurrency)) &&
                 period >= minTimeSwap,
             'Error on createSwap: cannot create the requested swap because period, cover% or targetSize are out of range'
         );

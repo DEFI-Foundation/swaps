@@ -350,3 +350,5 @@ BUG CORRECTION      Corrected bug in targetSize calculation if SwapType(0), in f
 FEATURE MERGE       Merged setSafetyMargin function in setSwapSafetyParameters (@Certik please check the updated limit logic, that allows to limit certain swap parameters if a limit boolean is active) (MetalSwapAbstract.sol lines 449 to 472)
 FEATURE ADDED       Added function setPriceProvider that only changes the priceProvider in order to solve Certik audit issue MSA-02
 
+2022.08.31
+BUG CORRECTION      Corrected bug in minimum targetSize requirement on the createSwap in different SwapTypes (should be different if expressed as Asset or Currency) (ETHUSDTSwap.sol and WBTCUSDTSwap.sol lines 49-57)

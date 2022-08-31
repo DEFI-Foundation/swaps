@@ -11,7 +11,6 @@ import '../SettlementFeeContainer.sol';
 import '../libraries/FinancialSwapManager.sol';
 import '../libraries/IPriceProvider.sol';
 
-
 abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     string public descriptionTOU;
     ERC20 public erc20Asset;
@@ -42,7 +41,8 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
     uint256 public limitSwap;
     uint256 public minTimeSwap;
     uint256 public coverX100Min;
-    uint256 public targetSizeMin;
+    uint256 public targetSizeMinAsset;
+    uint256 public targetSizeMinCurrency;
 
     Swap[] public swaps;
     enum SwapType {
@@ -121,7 +121,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         address _premiumAddress,
         address _governanceTokenRewardTreasury,
         uint256 _rateReward,
-        uint256 _minTimeSwap,
         string _descriptionTOU
     );
     event SetRewardRate(uint256 _rateReward);
@@ -135,8 +134,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         uint256 _settlementFeePerc,
         address payable _settlementFeeContainer,
         uint256 _PRICE_DECIMALS,
-        address _priceProvider,
-        uint16 _safetyMarginX100
+        address _priceProvider
     );
     event ChangeDescriptionAndTOU(string _descriptionTOU);
     event SetStateSC(bool state);
@@ -146,7 +144,8 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         bool _limitActive,
         uint256 _limitSwap,
         uint256 coverX100Min,
-        uint256 targetSizeMin,
+        uint256 targetSizeAsset,
+        uint256 targetSizeMinCurrency,
         uint16 _safetyMarginX100
     );
     event SetPriceProvider(address priceProvider);
@@ -199,7 +198,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         address _premiumAddress,
         address _governanceTokenRewardTreasury,
         uint256 _rateReward,
-        uint256 _minTimeSwap,
         string memory _descriptionTOU
     ) external onlyOwner {
         require(
@@ -214,7 +212,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         premiumAddress = payable(_premiumAddress);
         governanceTokenRewardTreasury = _governanceTokenRewardTreasury;
         rateReward = _rateReward;
-        minTimeSwap = _minTimeSwap;
 
         descriptionTOU = _descriptionTOU;
 
@@ -226,7 +223,6 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
             _premiumAddress,
             _governanceTokenRewardTreasury,
             _rateReward,
-            _minTimeSwap,
             _descriptionTOU
         );
     }
@@ -438,8 +434,9 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         return _governance;
     }
 
-    function setPriceProvider(address _priceProvider) external  onlyOwner{
-        require( _priceProvider != address(0),
+    function setPriceProvider(address _priceProvider) external onlyOwner {
+        require(
+            _priceProvider != address(0),
             'Error on setPriceProvider: input cannot be zero address'
         );
         priceProvider = IPriceProvider(_priceProvider);
@@ -451,14 +448,16 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         bool _limitActive,
         uint256 _limitSwap,
         uint256 _coverX100Min,
-        uint256 _targetSizeMin,
+        uint256 _targetSizeMinAsset,
+        uint256 _targetSizeMinCurrency,
         uint16 _safetyMarginX100
     ) external onlyGovernance {
         minTimeSwap = _minTimeSwap;
         limitActive = _limitActive;
         limitSwap = _limitSwap;
         coverX100Min = _coverX100Min;
-        targetSizeMin = _targetSizeMin;
+        targetSizeMinAsset = _targetSizeMinAsset;
+        targetSizeMinCurrency = _targetSizeMinCurrency;
         safetyMarginX100 = _safetyMarginX100;
 
         emit SetSwapSafetyParameters(
@@ -466,7 +465,8 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
             _limitActive,
             _limitSwap,
             _coverX100Min,
-            _targetSizeMin,
+            _targetSizeMinAsset,
+            _targetSizeMinCurrency,
             _safetyMarginX100
         );
     }
@@ -481,7 +481,9 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         uint256 currentPrice = getPrice();
 
         if (swapDirection == SwapType(0)) {
-            targetSize = formatAmount(targetSize, assetDecimals, 18) * currentPrice / PRICE_DECIMALS;
+            targetSize =
+                (formatAmount(targetSize, assetDecimals, 18) * currentPrice) /
+                PRICE_DECIMALS;
         } else {
             targetSize = formatAmount(targetSize, currencyDecimals, 18);
         }
@@ -539,8 +541,7 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         uint256 _settlementFeePerc,
         address payable _settlementFeeContainer,
         uint256 _PRICE_DECIMALS,
-        address _priceProvider,
-        uint16 _safetyMarginX100
+        address _priceProvider
     ) external onlyOwner {
         require(
             _governanceToken != address(0) &&
@@ -557,15 +558,13 @@ abstract contract MetalSwapAbstract is ReentrancyGuard, Ownable {
         );
         PRICE_DECIMALS = _PRICE_DECIMALS;
         priceProvider = IPriceProvider(_priceProvider);
-        safetyMarginX100 = _safetyMarginX100;
         emit SetMainSwapParameters(
             _governanceToken,
             _governanceTokenRewardTreasury,
             _settlementFeePerc,
             _settlementFeeContainer,
             _PRICE_DECIMALS,
-            _priceProvider,
-            _safetyMarginX100
+            _priceProvider
         );
     }
 
